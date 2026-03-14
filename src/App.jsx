@@ -1,121 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react'
+import ThemeButton from './components/ThemeButton'
+import GridRivals from './components/sections/GridRivals'
+import MemesSection from './components/sections/MemesSection'
+import GossipSection from './components/sections/GossipSection'
+import StandingsSection from './components/sections/StandingsSection'
+import NextRace from './components/sections/NextRace'
 
-function App() {
-  const [count, setCount] = useState(0)
+const SECTIONS = [
+  { id: 'bangkok-wdc', label: 'Bangkok WDC' },
+  { id: 'memes',       label: 'Memes' },
+  { id: 'gossip',      label: 'Gossip' },
+  { id: 'standings',   label: 'Standings' },
+  { id: 'next-race',   label: '2026 Season' },
+]
+
+export default function App() {
+  const [activeSection, setActiveSection] = useState('bangkok-wdc')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length) setActiveSection(visible[0].target.id)
+      },
+      { rootMargin: '-15% 0px -70% 0px', threshold: 0 }
+    )
+    SECTIONS.forEach(s => {
+      const el = document.getElementById(s.id)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <header className="header">
+        <span className="header__logo">Bangkok <span>F1</span></span>
+        <div className="header__actions">
+          <ThemeButton />
+          <span className="header__number" aria-hidden="true">1</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
+      <nav className="nav" aria-label="Page sections">
+        <ul className="nav__list">
+          {SECTIONS.map(s => (
+            <li key={s.id}>
+              <button
+                className={`nav__btn${activeSection === s.id ? ' active' : ''}`}
+                onClick={() => scrollTo(s.id)}
+              >
+                {s.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <main className="dashboard">
+        <section id="bangkok-wdc" className="section">
+          <GridRivals />
+        </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <section id="memes" className="section">
+          <MemesSection />
+        </section>
+
+        <section id="gossip" className="section">
+          <GossipSection />
+        </section>
+
+        <section id="standings" className="section">
+          <StandingsSection />
+        </section>
+
+        <section id="next-race" className="section">
+          <NextRace />
+        </section>
+      </main>
+    </div>
   )
 }
-
-export default App
