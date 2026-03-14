@@ -25,7 +25,7 @@ export function useNotionDB(databaseId, bodyJson = "{}") {
           const body = bodyJson ? JSON.parse(bodyJson) : {}
           if (cursor) body.start_cursor = cursor
 
-          const res = await fetch(`/api/notion/v1/databases/${databaseId}/query`, {
+          const res = await fetch(`/api/notion-query?databaseId=${databaseId}`, {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
             body:    JSON.stringify(body),

@@ -8,10 +8,14 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
-        "/api/notion": {
+        "/api/notion-query": {
           target: "https://api.notion.com",
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/api\/notion/, ""),
+          rewrite: path => {
+            const url = new URL(path, "http://localhost")
+            const dbId = url.searchParams.get("databaseId")
+            return `/v1/databases/${dbId}/query`
+          },
           headers: {
             Authorization: `Bearer ${env.NOTION_TOKEN}`,
             "Notion-Version": "2022-06-28",
